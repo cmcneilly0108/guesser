@@ -89,27 +89,33 @@ func bruteForce(answer string) int {
 			}
 		}
 	}
-	fmt.Print("The correct answer is =")
-	fmt.Println(previous)
+	//fmt.Print("The correct answer is =")
+	//fmt.Println(previous)
 	return guesses
 }
 
 // TBD - skip1 - inc2Guess 
 // TBD - bothEnds - decGuess
 // TBD - combine both above - is possible?
+// TBD - does finding how many of each num help?
 // Am I making use of all 3 pieces of information with each guess?
 
 func main() {
 	rand.Seed(time.Now().Unix())
-	answer := generate(20)
-	fmt.Println("The answer is = "+answer)
+	const tests = 1000
+	const numSize = 200
+	total := 0
+	var scores [tests] int
 
-	/* TBD - loop for 1000 tests, collect results and spit out the average # of guesses */
 	fmt.Println("Brute force")
-	guesses := bruteForce(answer)
-	fmt.Println("It took "+strconv.Itoa(guesses) + " guesses")
-    
-    
-
+	for j:=0;j<tests;j++ {
+		answer := generate(numSize)
+		//fmt.Println("The answer is = "+answer)
+		scores[j] = bruteForce(answer)
+		//fmt.Println("It took "+strconv.Itoa(scores[j]) + " guesses")
+		total += scores[j]
+	}
+	fmt.Print("Average guesses = ")
+	fmt.Println(total/tests)
 }
 
