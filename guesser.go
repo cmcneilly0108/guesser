@@ -22,6 +22,8 @@ func generate(len int) string {
 }
 
 func evaluate(guess string, answer string) (int, int, int) {
+	/* TBD - try passing in a pointer to a struct and change it 
+	   instead of passing back 3 integers */ 
 	exact, less, greater := 0, 0, 0
 	lofa := len(answer)
 	g, a := "", ""
@@ -50,40 +52,59 @@ func genAll(length int, char string) string {
 }
 
 func incGuess (g string, pos int) string {
-	res := g[0:5]
-	//int nnum
-	nnum := strconv.Atoi(g[5:6])
+	res := g[0:pos]
+	nnum, err := strconv.Atoi(g[pos:pos+1])
+	if err != nil {
+		fmt.Println(err)
+        }
 	nnum++
 	res += strconv.Itoa(nnum)
-	res += g[6:len(g)]
+	res += g[pos+1:len(g)]
 	return res
 }
 
 func bruteForce(answer string) int {
+	/* This only ever uses the exact data from the evaluate function.
+	   We can do better. */
 	guesses, lofa := 0, len(answer)
 	cur := 0
 	previous := guess{genAll(lofa,"0"), 0,0,0}
 	previous.exact, previous.less, previous.greater = evaluate(previous.gstring,answer)
 	guesses++
-	current := guess{incGuess(previous.gstring,cur),0,0,0}
+	current := guess{"",0,0,0}
 
-	/* gen++, evaluate, then compare results
-	   if exact, cur++ and gen++, if lower, last guess, cur++ and g++
-	   else gen++
-	for cur < lofa {
-		
-	} */
-	   	   
+	for cur < lofa { 
+		current = guess{incGuess(previous.gstring,cur),0,0,0}
+		current.exact, current.less, current.greater = evaluate(current.gstring,answer)
+		//fmt.Println(current)
+		guesses++
+		if (current.exact > previous.exact) {
+			cur++
+			previous = current
+		} else {
+			if (current.exact < previous.exact) {
+				cur++
+			} else {
+				previous = current
+			}
+		}
+	}
+	fmt.Print("The correct answer is =")
 	fmt.Println(previous)
-	fmt.Println(current)
 	return guesses
 }
+
+// TBD - skip1 - inc2Guess 
+// TBD - bothEnds - decGuess
+// TBD - combine both above - is possible?
+// Am I making use of all 3 pieces of information with each guess?
 
 func main() {
 	rand.Seed(time.Now().Unix())
 	answer := generate(20)
 	fmt.Println("The answer is = "+answer)
 
+	/* TBD - loop for 1000 tests, collect results and spit out the average # of guesses */
 	fmt.Println("Brute force")
 	guesses := bruteForce(answer)
 	fmt.Println("It took "+strconv.Itoa(guesses) + " guesses")
