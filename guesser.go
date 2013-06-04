@@ -17,26 +17,42 @@ func generate(len int) string {
 func evaluate(guess string, answer string) (int, int, int) {
 	exact, less, greater := 0, 0, 0
 	lofa := len(answer)
-	for i:=1;i<=lofa;i++ {
-		fmt.Println(i)
+	g, a := "", ""
+	for i:=0;i<lofa;i++ {
+		g = guess[i:i+1]
+		a = answer[i:i+1]
+		if (g < a) {
+			less++
+		} else {
+			if (g == a) {
+				exact++
+			} else {
+ 				greater++
+ 			}
+		}
 	}
 	return exact, less, greater
 }
 
 func bruteForce(answer string) int {
 	guesses, lofa := 0, len(answer)
-	
+
+	guess := generate(lofa)
+	evaluate(guess,answer)
+	fmt.Println(guess)
+	return guesses
 }
 
 func main() {
 	rand.Seed(time.Now().Unix())
-	answer, guess := generate(20), generate(20)
-	fmt.Println(answer)
-	fmt.Println(guess)
-	evaluate(guess, answer)
-    
-    
+	answer := generate(20)
+	fmt.Println("The answer is ="+answer)
+
 	fmt.Println("Brute force")
+	guesses := bruteForce(answer)
+	fmt.Println("It took "+strconv.Itoa(guesses) + " guesses")
+    
+    
 
 }
 
