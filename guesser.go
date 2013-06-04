@@ -120,6 +120,35 @@ func bruteForce(answer string) int {
 	return guesses
 }
 
+func biBrute(answer string) int {
+	guesses, lofa := 0, len(answer)
+	fcur, bcur := 0, len(answer)-1
+	previous := guess{genAll(lofa,"0"), 0,0,0}
+	previous.exact, previous.less, previous.greater = evaluate(previous.gstring,answer)
+	guesses++
+	current := guess{"",0,0,0}
+
+	for fcur < lofa { 
+		current = guess{incGuess(previous.gstring,fcur),0,0,0}
+		current.exact, current.less, current.greater = evaluate(current.gstring,answer)
+		//fmt.Println(current)
+		guesses++
+		if (current.exact > previous.exact) {
+			fcur++
+			previous = current
+		} else {
+			if (current.exact < previous.exact) {
+				fcur++
+			} else {
+				previous = current
+			}
+		}
+	}
+	//fmt.Print("The correct answer is =")
+	//fmt.Println(previous)
+	return guesses
+}
+
 func skipOne(answer string) int {
 	guesses, lofa := 0, len(answer)
 	cur := 0
@@ -157,16 +186,15 @@ func skipOne(answer string) int {
 	return guesses
 }
 
-// TBD - skip1 - inc2Guess 
-// TBD - bothEnds - decGuess
-// TBD - combine both above - is possible?
+// TBD - biBrute - decGuess
+// TBD - biSkip - is possible?
 // TBD - does finding how many of each num help?
 // Am I making use of all 3 pieces of information with each guess?
 
 func main() {
 	rand.Seed(time.Now().Unix())
 	const tests = 1000
-	numSize := 20
+	numSize := 200
 	total := 0
 	var agd float64
 	var scores [tests] int
