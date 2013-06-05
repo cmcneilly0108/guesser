@@ -49,6 +49,18 @@ func genAll(length int, char string) string {
 	return result
 }
 
+func genSplit(length int, charS string, charE string) string {
+	result := ""
+	for i:=0;i<length;i++ {
+		if (i*2 < length) {
+			result += charS
+		} else {
+			result += charE
+		}
+	}
+	return result
+}
+
 func incGuess (g string, pos int) string {
 	res := g[0:pos]
 	nnum, err := strconv.Atoi(g[pos:pos+1])
@@ -123,25 +135,61 @@ func bruteForce(answer string) int {
 func biBrute(answer string) int {
 	guesses, lofa := 0, len(answer)
 	fcur, bcur := 0, len(answer)-1
-	previous := guess{genAll(lofa,"0"), 0,0,0}
+	fdone, bdone := false, false
+	previous := guess{genSplit(lofa,"0","9"), 0,0,0}
 	previous.exact, previous.less, previous.greater = evaluate(previous.gstring,answer)
 	guesses++
 	current := guess{"",0,0,0}
 
-	for fcur < lofa { 
-		current = guess{incGuess(previous.gstring,fcur),0,0,0}
+	//for current.exact < len(answer) { 
+	//for z:=0;z<30;z++ {
+	for (!fdone || !bdone) {
+		if (!fdone) {
+			current = guess{incGuess(previous.gstring,fcur),0,0,0}
+			if (!bdone) {
+				current.gstring  = decGuess(current.gstring,bcur)
+			}
+		} else {
+			current = guess{decGuess(previous.gstring,bcur),0,0,0}
+		}
+
+		//current.gstring  = decGuess(current.gstring,bcur)
 		current.exact, current.less, current.greater = evaluate(current.gstring,answer)
 		//fmt.Println(current)
 		guesses++
-		if (current.exact > previous.exact) {
+		switch {
+		case (current.exact == previous.exact+2):
 			fcur++
+			bcur--
 			previous = current
-		} else {
-			if (current.exact < previous.exact) {
+		case (current.exact == previous.exact):
+			previous = current
+		case (current.exact == previous.exact-2):
+			fcur++
+			bcur--
+		case (current.exact == previous.exact+1):
+			if (current.less < previous.less) {
 				fcur++
 			} else {
-				previous = current
+				bcur--
 			}
+			previous = current
+		case (current.exact == previous.exact-1):
+			if (current.greater > previous.greater) {
+				fcur++
+			} else {
+				bcur--
+			}
+		default:
+			previous = current
+		}
+		if (fcur*2 >= lofa) {
+			fdone = true
+			//fmt.Print("fdone!")
+		}
+		if (bcur*2 <= lofa) {
+			bdone = true
+			//fmt.Print("bdone!")
 		}
 	}
 	//fmt.Print("The correct answer is =")
@@ -193,8 +241,8 @@ func skipOne(answer string) int {
 
 func main() {
 	rand.Seed(time.Now().Unix())
-	const tests = 1000
-	numSize := 200
+	const tests = 10
+	numSize := 10
 	total := 0
 	var agd float64
 	var scores [tests] int
@@ -217,6 +265,19 @@ func main() {
 		answer := generate(numSize)
 		//fmt.Println("The answer is = "+answer)
 		scores[j] = skipOne(answer)
+		//fmt.Println("It took "+strconv.Itoa(scores[j]) + " guesses")
+		total += scores[j]
+	}
+	fmt.Print("Average guesses/digit = ")
+	agd = float64(total)/(float64(tests)*float64(numSize))
+	fmt.Println(agd)
+
+	fmt.Println("Bi Brute")
+	total = 0
+	for j:=0;j<tests;j++ {
+		answer := generate(numSize)
+		//fmt.Println("The answer is = "+answer)
+		scores[j] = biBrute(answer)
 		//fmt.Println("It took "+strconv.Itoa(scores[j]) + " guesses")
 		total += scores[j]
 	}
