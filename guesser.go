@@ -147,23 +147,20 @@ func biBrute(answer string) int {
 	for (!fdone || !bdone) {
 		// Try - if I have just gotten one, don't change the other
 		current = guess{previous.gstring,0,0,0}
-		if (!fdone) {
-			if (!bhit || (fhit && bhit)) {
-				current = guess{incGuess(current.gstring,fcur),0,0,0}
-			}
-			if (!bhit || (fhit && bhit)) {
-				current = guess{incGuess(current.gstring,fcur),0,0,0}
-			}
-			if (!bdone && !fhit) {
+		if (!fdone && (fhit || !bhit)) {
+			current.gstring = incGuess(current.gstring,fcur)
+			if (!bdone && (!bhit && !fhit)) {
 				current.gstring  = decGuess(current.gstring,bcur)
+				bhit = false
 			}
+			fhit = false
 		} else {
-			current = guess{decGuess(current.gstring,bcur),0,0,0}
+			current.gstring  = decGuess(current.gstring,bcur)
+			bhit = false
 		}
-		fhit, bhit = false, false
 
 		current.exact, current.less, current.greater = evaluate(current.gstring,answer)
-		fmt.Println(current)
+		//fmt.Println(current)
 		guesses++
 		switch {
 		case (current.exact == previous.exact+2):
@@ -200,11 +197,11 @@ func biBrute(answer string) int {
 			previous = current
 		}
 		if (fcur*2 >= lofa) {
-			fdone = true
+			fdone, fhit = true, false
 			//fmt.Print("fdone!")
 		}
 		if (bcur*2 < lofa) {
-			bdone = true
+			bdone, bhit = true, false
 			//fmt.Print("bdone!")
 		}
 	}
@@ -250,15 +247,15 @@ func skipOne(answer string) int {
 	return guesses
 }
 
-// TBD - biBrute - decGuess
+// TBD - binary guessing
 // TBD - biSkip - is possible?
 // TBD - does finding how many of each num help?
 // Am I making use of all 3 pieces of information with each guess?
 
 func main() {
 	rand.Seed(time.Now().Unix())
-	const tests = 100
-	numSize := 20
+	const tests = 1000
+	numSize := 50
 	total := 0
 	var agd float64
 	var scores [tests] int
@@ -290,10 +287,10 @@ func main() {
 
 	fmt.Println("Bi Brute")
 	total = 0
-	for j:=0;j<1;j++ {
-		//answer := generate(numSize)
-		answer := "25192812505289738406"
-		fmt.Println("The answer is = "+answer)
+	for j:=0;j<tests;j++ {
+		answer := generate(numSize)
+		//answer := "25192812505289738406"
+		//fmt.Println("The answer is = "+answer)
 		scores[j] = biBrute(answer)
 		//fmt.Println("It took "+strconv.Itoa(scores[j]) + " guesses")
 		total += scores[j]
