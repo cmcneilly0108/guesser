@@ -73,6 +73,13 @@ func incGuess (g string, pos int) string {
 	return res
 }
 
+func modGuess (g string, pos int, rep int) string {
+	res := g[0:pos]
+	res += strconv.Itoa(rep)
+	res += g[pos+1:len(g)]
+	return res
+}
+
 func decGuess (g string, pos int) string {
 	res := g[0:pos]
 	nnum, err := strconv.Atoi(g[pos:pos+1])
@@ -124,6 +131,47 @@ func bruteForce(answer string) int {
 				cur++
 			} else {
 				previous = current
+			}
+		}
+	}
+	//fmt.Print("The correct answer is =")
+	//fmt.Println(previous)
+	return guesses
+}
+
+func binarySearch(answer string) int {
+	guesses, lofa := 0, len(answer)
+	cur, glo, ghi, gcur := 0,0,9,0
+	previous := guess{genAll(lofa,"0"), 0,0,0}
+	previous.exact, previous.less, previous.greater = evaluate(previous.gstring,answer)
+	guesses++
+	current := guess{"",0,0,0}
+	//fmt.Println("The answer is = "+answer)
+
+	for cur < lofa {
+		gcur = (glo +ghi + 1)/2
+		//fmt.Print(glo)
+		//fmt.Print(" and ")
+		//fmt.Println(ghi)
+		current = guess{modGuess(previous.gstring,cur,gcur),0,0,0}
+		current.exact, current.less, current.greater = evaluate(current.gstring,answer)
+		//fmt.Println(current)
+		guesses++
+		if (current.exact > previous.exact) {
+			cur++
+			previous = current
+			glo, ghi = 0,9
+		} else {
+			if (current.exact < previous.exact) {
+				cur++
+				glo, ghi = 0,9
+			} else {
+				if (current.greater > previous.greater) {
+					ghi = gcur - 1
+				} else {
+					glo = gcur + 1
+					previous = current
+				}
 			}
 		}
 	}
@@ -299,5 +347,17 @@ func main() {
 	agd = float64(total)/(float64(tests)*float64(numSize))
 	fmt.Println(agd)
 
+	fmt.Println("Binary Search")
+	total = 0
+	for j:=0;j<tests;j++ {
+		answer := generate(numSize)
+		//fmt.Println("The answer is = "+answer)
+		scores[j] = binarySearch(answer)
+		//fmt.Println("It took "+strconv.Itoa(scores[j]) + " guesses")
+		total += scores[j]
+	}
+	fmt.Print("Average guesses/digit = ")
+	agd = float64(total)/(float64(tests)*float64(numSize))
+	fmt.Println(agd)
 }
 
