@@ -135,49 +135,65 @@ func bruteForce(answer string) int {
 func biBrute(answer string) int {
 	guesses, lofa := 0, len(answer)
 	fcur, bcur := 0, len(answer)-1
-	fdone, bdone := false, false
+	fdone, bdone, fhit, bhit := false, false, true, true
 	previous := guess{genSplit(lofa,"0","9"), 0,0,0}
 	previous.exact, previous.less, previous.greater = evaluate(previous.gstring,answer)
+	//fmt.Println(previous)
 	guesses++
 	current := guess{"",0,0,0}
 
 	//for current.exact < len(answer) { 
 	//for z:=0;z<30;z++ {
 	for (!fdone || !bdone) {
+		// Try - if I have just gotten one, don't change the other
+		current = guess{previous.gstring,0,0,0}
 		if (!fdone) {
-			current = guess{incGuess(previous.gstring,fcur),0,0,0}
-			if (!bdone) {
+			if (!bhit || (fhit && bhit)) {
+				current = guess{incGuess(current.gstring,fcur),0,0,0}
+			}
+			if (!bhit || (fhit && bhit)) {
+				current = guess{incGuess(current.gstring,fcur),0,0,0}
+			}
+			if (!bdone && !fhit) {
 				current.gstring  = decGuess(current.gstring,bcur)
 			}
 		} else {
-			current = guess{decGuess(previous.gstring,bcur),0,0,0}
+			current = guess{decGuess(current.gstring,bcur),0,0,0}
 		}
+		fhit, bhit = false, false
 
-		//current.gstring  = decGuess(current.gstring,bcur)
 		current.exact, current.less, current.greater = evaluate(current.gstring,answer)
-		//fmt.Println(current)
+		fmt.Println(current)
 		guesses++
 		switch {
 		case (current.exact == previous.exact+2):
+			fhit = true
 			fcur++
+			bhit = true
 			bcur--
 			previous = current
 		case (current.exact == previous.exact):
 			previous = current
 		case (current.exact == previous.exact-2):
+			fhit = true
 			fcur++
+			bhit = true
 			bcur--
 		case (current.exact == previous.exact+1):
 			if (current.less < previous.less) {
+				fhit = true
 				fcur++
 			} else {
+				bhit = true
 				bcur--
 			}
 			previous = current
 		case (current.exact == previous.exact-1):
 			if (current.greater > previous.greater) {
+				fhit = true
 				fcur++
 			} else {
+				bhit = true
 				bcur--
 			}
 		default:
@@ -187,7 +203,7 @@ func biBrute(answer string) int {
 			fdone = true
 			//fmt.Print("fdone!")
 		}
-		if (bcur*2 <= lofa) {
+		if (bcur*2 < lofa) {
 			bdone = true
 			//fmt.Print("bdone!")
 		}
@@ -241,8 +257,8 @@ func skipOne(answer string) int {
 
 func main() {
 	rand.Seed(time.Now().Unix())
-	const tests = 10
-	numSize := 10
+	const tests = 100
+	numSize := 20
 	total := 0
 	var agd float64
 	var scores [tests] int
@@ -274,9 +290,10 @@ func main() {
 
 	fmt.Println("Bi Brute")
 	total = 0
-	for j:=0;j<tests;j++ {
-		answer := generate(numSize)
-		//fmt.Println("The answer is = "+answer)
+	for j:=0;j<1;j++ {
+		//answer := generate(numSize)
+		answer := "25192812505289738406"
+		fmt.Println("The answer is = "+answer)
 		scores[j] = biBrute(answer)
 		//fmt.Println("It took "+strconv.Itoa(scores[j]) + " guesses")
 		total += scores[j]
